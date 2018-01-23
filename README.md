@@ -1,9 +1,14 @@
-# IPFS Boards Rebooted
+# OrbitDB Board Store
 
-Three years ago IPFS Boards was in development. A lot has changed since then
+Three years ago I was working on IPFS Boards. A lot has changed since then
 and now the project should be started from scratch.
 
-These are some notes I'm writing to plan development
+This is a Store for Orbit DB that can handle discussion boards
+with posts and comments.
+
+Nothing works yet :(
+
+Here's some notes about what's going on
 
 Features in initial release
 
@@ -31,3 +36,23 @@ UI
 - ‎create board
 - ‎create post
 - ‎comment on posts or reply to comments
+
+Boards are aggregators
+
+- each Post is an indipendent entity
+- Boards are just aggregation: they link to posts
+- this means no more wonky crossposting
+
+Post
+
+- has a content and content type
+- can be commented on
+- can be linked from other posts, boards
+
+Comments
+
+- can be linked to
+- has a content
+- can be written to the post (public comment)
+- can also be written to the board (private comments)
+- can be a response to another comment from the same universe (public/private)
