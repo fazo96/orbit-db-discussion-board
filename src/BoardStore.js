@@ -7,19 +7,30 @@ class Board extends Store {
     if (!options.indexBy) Object.assign(options, { indexBy: '_id' })
     if (!options.Index) Object.assign(options, { Index: BoardIndex })
     super(ipfs, id, dbname, options)
-    this._type = 'board' 
+    this._type = 'discussion-board' 
   }
 
-  updateMetadata() {
-    throw new Error('Not implemented yet')
+  get type() {
+    return 'discussion-board'
+  }
+
+  updateMetadata(metadata) {
+    this._addOperation({
+      type: 'UPDATE_METADATA',
+      metadata
+    })
   }
 
   getPosts() {
     throw new Error('Not implemented yet')
   }
 
-  addPost() {
-    throw new Error('Not implemented yet')
+  addPost(title, content) {
+    this._addOperation({
+      type: 'ADD_POST',
+      title,
+      content
+    })
   }
 
   updatePost() {
