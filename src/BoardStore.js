@@ -10,7 +10,7 @@ class Board extends Store {
     this._type = 'discussion-board' 
   }
 
-  get type() {
+  static get type() {
     return 'discussion-board'
   }
 
