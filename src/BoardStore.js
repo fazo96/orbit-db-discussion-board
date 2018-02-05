@@ -16,14 +16,14 @@ class Board extends Store {
 
   updateMetadata(metadata) {
     this._addOperation({
-      type: 'UPDATE_METADATA',
+      op: 'UPDATE_METADATA',
       metadata
     })
   }
 
   addPost(title, multihash) {
     this._addOperation({
-      type: 'ADD_POST',
+      op: 'ADD_POST',
       title,
       multihash 
     })
