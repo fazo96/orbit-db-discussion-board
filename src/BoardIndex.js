@@ -1,7 +1,25 @@
 
 class BoardIndex {
   constructor(id) {
-    this._index = {}
+    this._index = {
+      posts: {},
+      comments: {},
+      metadata: {
+        title: 'Unnamed Board'
+      }
+    }
+  }
+
+  get metadata() {
+    return this._index.metadata
+  }
+
+  get posts() {
+    return Object.values(this._index.metadata.posts)
+  }
+
+  getPost(multihash) {
+    return this.posts[multihash]
   }
   
   updateIndex(oplog) {

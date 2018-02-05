@@ -40,6 +40,18 @@ class Board extends Store {
   updateComment() {
     throw new Error('Not implemented yet')
   }
+
+  get title() {
+    return this._index.title
+  }
+
+  get posts() {
+    return this._index.posts
+  }
+
+  getPost(multihash) {
+    return this._index.getPost(multihash)
+  }
 }
 
 module.exports = Board
