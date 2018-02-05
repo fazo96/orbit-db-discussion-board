@@ -21,15 +21,11 @@ class Board extends Store {
     })
   }
 
-  getPosts() {
-    throw new Error('Not implemented yet')
-  }
-
-  addPost(title, content) {
+  addPost(title, multihash) {
     this._addOperation({
       type: 'ADD_POST',
       title,
-      content
+      multihash 
     })
   }
 
