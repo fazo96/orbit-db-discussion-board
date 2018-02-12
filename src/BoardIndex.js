@@ -1,12 +1,10 @@
 
 class BoardIndex {
-  constructor(id) {
+  constructor() {
     this._index = {
       posts: {},
       comments: {},
-      metadata: {
-        title: 'Unnamed Board'
-      }
+      metadata: getDefaultMetadata()
     }
   }
 
@@ -21,7 +19,7 @@ class BoardIndex {
   }
 
   getPost(multihash) {
-    return this.posts[multihash]
+    return this._index.posts[multihash]
   }
   
   updateIndex(oplog) {
@@ -29,14 +27,24 @@ class BoardIndex {
       .slice()
       .forEach(item => {
           if(item.payload.op === 'ADD_POST') {
-            this._index.posts[item.payload.multihash] = {
-              title: item.payload.title
+            this._index.posts[item.hash] = {
+              title: item.payload.title,
+              contentType: item.payload.contentType
+            }
+            if (item.payload.multihash) {
+              this._index.posts[item.hash].multihash = item.payload.multihash
+            } else if(item.payload.text) {
+              this._index.posts[item.hash].text = item.payload.text
             }
           } else if(item.payload.op === 'UPDATE_METADATA') {
             this._index.metadata = item.payload.metadata
           }
       })
   }
+}
+
+function getDefaultMetadata() {
+
 }
 
 module.exports = BoardIndex

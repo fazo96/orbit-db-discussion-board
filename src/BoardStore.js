@@ -4,7 +4,6 @@ const BoardIndex = require('./BoardIndex')
 class Board extends Store {
   constructor(ipfs, id, dbname, options) {
     if (!options) options = {}
-    if (!options.indexBy) Object.assign(options, { indexBy: '_id' })
     if (!options.Index) Object.assign(options, { Index: BoardIndex })
     super(ipfs, id, dbname, options)
     this._type = 'discussion-board' 
@@ -14,35 +13,26 @@ class Board extends Store {
     return 'discussion-board'
   }
 
-  updateMetadata(metadata) {
-    this._addOperation({
+  async updateMetadata(metadata) {
+    return await this._addOperation({
       op: 'UPDATE_METADATA',
       metadata
     })
   }
 
-  addPost(title, multihash) {
-    this._addOperation({
+  async addPost(post) {
+    const op = {
       op: 'ADD_POST',
-      title,
-      multihash 
-    })
-  }
-
-  updatePost() {
-    throw new Error('Not implemented yet')
-  }
-
-  addComment() {
-    throw new Error('Not implemented yet')
-  }
-
-  updateComment() {
-    throw new Error('Not implemented yet')
-  }
-
-  get title() {
-    return this._index.title
+      title: post.title || 'Untitled Post'
+    }
+    if (post.multihash) {
+      op.multihash = post.multihash
+      op.contentType = post.contentType
+    } else {
+      op.text = post.text || ''
+      op.contentType = op.contentType || 'text/plain'
+    }
+    return await this._addOperation(op)
   }
 
   get posts() {
