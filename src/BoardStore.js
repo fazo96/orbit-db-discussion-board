@@ -23,14 +23,16 @@ class Board extends Store {
   async addPost(post) {
     const op = {
       op: 'ADD_POST',
-      title: post.title || 'Untitled Post'
+      post: preparePost(post)
     }
-    if (post.multihash) {
-      op.multihash = post.multihash
-      op.contentType = post.contentType
-    } else {
-      op.text = post.text || ''
-      op.contentType = op.contentType || 'text/plain'
+    return await this._addOperation(op)
+  }
+
+  async updatePost(id, post) {
+    const op = {
+      op: 'UPDATE_POST',
+      previousVersion: id,
+      post: preparePost(post)
     }
     return await this._addOperation(op)
   }
@@ -42,6 +44,20 @@ class Board extends Store {
   getPost(multihash) {
     return this._index.getPost(multihash)
   }
+}
+
+function preparePost(post) {
+  const op = {
+    title: post.title || 'Untitled Post'
+  }
+  if (post.multihash) {
+    op.multihash = post.multihash
+    op.contentType = post.contentType
+  } else {
+    op.text = post.text || ''
+    op.contentType = op.contentType || 'text/plain'
+  }
+  return op
 }
 
 module.exports = Board

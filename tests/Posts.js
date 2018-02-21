@@ -53,10 +53,26 @@ describe('orbit-db - Key-Value Store', function () {
             title: 'Post Title',
             text: 'hello world'
         })
-        assert.deepEqual(db.getPost(hash), {
+        const post = db.getPost(hash)
+        assert.equal(post.title, 'Post Title')
+        assert.equal(post.text, 'hello world')
+        assert.equal(post.contentType, 'text/plain')
+        assert.equal(post.key, orbitdb1.key.getPublic('hex'))
+    })
+
+    it('update post', async () => {
+        const hash = await db.addPost({
             title: 'Post Title',
-            text: 'hello world',
-            contentType: 'text/plain'
+            text: 'hello world'
         })
+        const post = db.getPost(hash)
+        const updatedHash = await db.updatePost(hash, {
+            title: 'Post Title',
+            text: 'actually I changed my mind'
+        })
+        const updatedPost = db.getPost(hash)
+        assert.deepEqual(db.getPost(hash), db.getPost(updatedHash))
+        assert.equal(updatedPost.title, 'Post Title')
+        assert.equal(updatedPost.text, 'actually I changed my mind')
     })
 })

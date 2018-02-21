@@ -1,10 +1,14 @@
+const addPost = require('./operations/addPost')
+const updatePost = require('./operations/updatePost')
 
 class BoardIndex {
   constructor() {
     this._index = {
       posts: {},
       comments: {},
-      metadata: getDefaultMetadata()
+      administrations: {
+        anarchy: getDefaultMetadata()
+      }
     }
   }
 
@@ -19,26 +23,46 @@ class BoardIndex {
   }
 
   getPost(multihash) {
-    return this._index.posts[multihash]
+    return this._index.posts[this.resolveLink(this._index.posts, multihash)]
+  }
+
+  resolveLink(container, key, history = []) {
+    if (container[key]) {
+       if (typeof container[key] === 'object') {
+        if (typeof container[key].nextVersion === 'string') {
+          const next = container[key].nextVersion
+          return this.resolveLink(container, next, history.concat(key))
+        } else {
+          return key
+        }
+      } else if (typeof container[key] === 'string') {
+        if (history.indexOf(container[key]) >= 0) {
+          // Recursive link
+          return undefined
+        } else {
+          return this.resolveLink(container, container[key], history.concat(key))
+        }
+      }
+    }
+  }
+
+  updateContent(container, currentKey, newKey) {
+    const toUpdate = this.resolveLink(container, currentKey)
+    container[toUpdate] = newKey
+    container[newKey].previousVersion = toUpdate
   }
   
   updateIndex(oplog) {
     oplog.values
       .slice()
       .forEach(item => {
-          if(item.payload.op === 'ADD_POST') {
-            this._index.posts[item.hash] = {
-              title: item.payload.title,
-              contentType: item.payload.contentType
-            }
-            if (item.payload.multihash) {
-              this._index.posts[item.hash].multihash = item.payload.multihash
-            } else if(item.payload.text) {
-              this._index.posts[item.hash].text = item.payload.text
-            }
-          } else if(item.payload.op === 'UPDATE_METADATA') {
-            this._index.metadata = item.payload.metadata
-          }
+        if(item.payload.op === 'ADD_POST') {
+          addPost(this, item)
+        } else if(item.payload.op === 'UPDATE_POST') {
+          updatePost(this, item)
+        } else if(item.payload.op === 'UPDATE_METADATA') {
+          this._index.administrations.anarchy = item.payload.metadata
+        }
       })
   }
 }
