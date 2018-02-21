@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/fazo96/ipfs-boards#readme",
   "dependencies": {
+    "lodash": "^4.17.5",
     "orbit-db-store": "^2.2.1"
   },
   "devDependencies": {

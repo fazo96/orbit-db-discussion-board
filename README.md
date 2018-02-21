@@ -7,6 +7,8 @@ What can you do
 
 - create a discussion board and change some metadata like the title
 - create posts with a title and a multihash pointing to the content, or some text
+- update a post, if you were the original creator
+- comment to a post
 
 What's planned
 

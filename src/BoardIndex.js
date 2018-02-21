@@ -1,5 +1,7 @@
 const addPost = require('./operations/addPost')
 const updatePost = require('./operations/updatePost')
+const addComment = require('./operations/addComment')
+const _ = require('lodash')
 
 class BoardIndex {
   constructor() {
@@ -23,15 +25,45 @@ class BoardIndex {
   }
 
   getPost(multihash) {
-    return this._index.posts[this.resolveLink(this._index.posts, multihash)]
+    return this._index.posts[this.resolvePost(multihash)]
+  }
+
+  resolvePost(multihash) {
+    return this.resolveLink(this._index.posts, multihash)
+  }
+
+  resolvePostBackwards(multihash) {
+    return this.resolveLinkBackwards(this._index.posts, multihash)
+  }
+
+  resolveComment(postId, commentId) {
+    this.prepareCommentsFor(postId, commentId)
+    return this.resolveLink(this._index.comments[postId], commentId)
+  }
+
+  getComments(postMultihash, replyTo = 'post') {
+    const multihash = this.resolvePostBackwards(postMultihash)
+    const comments = _.get(this._index.comments, [multihash, replyTo], {})
+    return Object.keys(comments)
+      // Remove fwd pointers
+      .filter(c => typeof comments[c] === 'object')
+      // write multihash
+      .map(c => {
+        return Object.assign({ multihash: c }, comments[c])
+      })
   }
 
   resolveLink(container, key, history = []) {
-    if (container[key]) {
+    if (key && container[key]) {
        if (typeof container[key] === 'object') {
         if (typeof container[key].nextVersion === 'string') {
           const next = container[key].nextVersion
-          return this.resolveLink(container, next, history.concat(key))
+          if (history.indexOf(next) >= 0) {
+            // Recursive link
+            return undefined
+          } else {
+            return this.resolveLink(container, next, history.concat(key))
+          }
         } else {
           return key
         }
@@ -43,6 +75,48 @@ class BoardIndex {
           return this.resolveLink(container, container[key], history.concat(key))
         }
       }
+    }
+  }
+
+  resolveLinkBackwards(container, key, history = []) {
+    if (key && container[key]) {
+      if (typeof container[key] === 'object') {
+        if (container[key].previousVersion) {
+          const oldKey = container[key].previousVersion
+          if (history.indexOf(oldKey) >= 0) {
+            // Recursive link
+            return undefined
+          } else {
+            return this.resolveLinkBackwards(container, oldKey, history.concat(key))
+          }
+        } else {
+          return key
+        }
+      } else if (typeof container[key] === 'string') {
+        for (const k in container) {
+          if (container[k] === key) {
+            if (history.indexOf(k) >= 0) {
+              // Recursive link
+              return undefined
+            } else {
+              return this.resolveLinkBackwards(container, k, history.concat(key))
+            }
+          }
+        }
+        return key
+      }
+    }
+  }
+
+  prepareCommentsFor(postId, replyTo = null) {
+    if (!this._index.comments[postId]) {
+      this._index.comments[postId] = {}
+    }
+    if (!this._index.comments[postId].post) {
+      this._index.comments[postId].post = {}
+    }
+    if (replyTo && !this._index.comments[postId][replyTo]) {
+      this._index.comments[postId][replyTo] = {}
     }
   }
 
@@ -60,6 +134,10 @@ class BoardIndex {
           addPost(this, item)
         } else if(item.payload.op === 'UPDATE_POST') {
           updatePost(this, item)
+        } else if (item.payload.op === 'ADD_COMMENT'){
+          addComment(this, item)
+        } else if (item.payload.op === 'UPDATE_COMMENT'){
+          // TODO: updateComment(this, item)
         } else if(item.payload.op === 'UPDATE_METADATA') {
           this._index.administrations.anarchy = item.payload.metadata
         }
@@ -68,7 +146,9 @@ class BoardIndex {
 }
 
 function getDefaultMetadata() {
-
+  return {
+    title: 'Unnamed Board'
+  }
 }
 
 module.exports = BoardIndex

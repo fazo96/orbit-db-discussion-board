@@ -37,12 +37,26 @@ class Board extends Store {
     return await this._addOperation(op)
   }
 
+  async commentPost(postId, comment, replyTo = 'post') {
+    const op = {
+      op: 'ADD_COMMENT',
+      postId,
+      comment: prepareComment(comment),
+      replyTo
+    }
+    return await this._addOperation(op)
+  }
+
   get posts() {
     return this._index.posts
   }
 
   getPost(multihash) {
     return this._index.getPost(multihash)
+  }
+
+  getComments(postMultihash, replyTo = 'post') {
+    return this._index.getComments(postMultihash, replyTo)
   }
 }
 
@@ -58,6 +72,13 @@ function preparePost(post) {
     op.contentType = op.contentType || 'text/plain'
   }
   return op
+}
+
+function prepareComment(comment) {
+  return {
+    text: comment.text,
+    contentType: comment.contentType || 'text/plain'
+  }
 }
 
 module.exports = Board

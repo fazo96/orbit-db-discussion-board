@@ -10,7 +10,7 @@ const ipfsPath = './orbitdb/tests/ipfs'
 const BoardStore = require('../src/BoardStore')
 OrbitDB.addDatabaseType(BoardStore.type, BoardStore)
 
-describe('orbit-db - Key-Value Store', function () {
+describe('OrbitDB Discussion Board', function () {
     this.timeout(config.timeout)
 
     let ipfs, orbitdb1, db
@@ -74,5 +74,35 @@ describe('orbit-db - Key-Value Store', function () {
         assert.deepEqual(db.getPost(hash), db.getPost(updatedHash))
         assert.equal(updatedPost.title, 'Post Title')
         assert.equal(updatedPost.text, 'actually I changed my mind')
+    })
+
+    it('add comment to post', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const comments = db.getComments(hash)
+        assert.equal(comments.length, 1)
+    })
+
+    it('comment to post stays after post update', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const comments = db.getComments(hash)
+        const updatedHash = await db.updatePost(hash, {
+            title: 'Post Title',
+            text: 'actually I changed my mind'
+        })
+        const updatedComments = db.getComments(hash)
+        assert.deepEqual(comments, updatedComments)
+        assert.deepEqual(db.getComments(hash), db.getComments(updatedHash))
     })
 })
