@@ -105,4 +105,38 @@ describe('OrbitDB Discussion Board', function () {
         assert.deepEqual(comments, updatedComments)
         assert.deepEqual(db.getComments(hash), db.getComments(updatedHash))
     })
+
+    it('can comment as a reply to another comment', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const replyHash = await db.commentPost(hash, {
+            text: 'I am a reply'
+        }, commentHash)
+        const replies = db.getComments(hash, commentHash)
+        assert.deepEqual(replies[0].text, 'I am a reply')
+    })
+
+    it('replies stay after post is updated', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const replyHash = await db.commentPost(hash, {
+            text: 'I am a reply'
+        }, commentHash)
+        const updatedHahs = db.updatePost(hash, {
+            title: 'Post Title',
+            text: 'updated'
+        })
+        const replies = db.getComments(hash, commentHash)
+        assert.deepEqual(replies[0].text, 'I am a reply')
+    })
 })
