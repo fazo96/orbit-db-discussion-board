@@ -2,6 +2,8 @@ const addPost = require('./operations/addPost')
 const updatePost = require('./operations/updatePost')
 const addComment = require('./operations/addComment')
 const updateComment = require('./operations/updateComment')
+const hideComment = require('./operations/hideComment')
+const hidePost = require('./operations/hidePost')
 const _ = require('lodash')
 
 class BoardIndex {
@@ -9,7 +11,7 @@ class BoardIndex {
     this._index = {
       posts: {},
       comments: {},
-      administrations: {
+      curations: {
         anarchy: getDefaultMetadata()
       }
     }
@@ -129,7 +131,15 @@ class BoardIndex {
   updateContent(container, currentKey, newKey) {
     const toUpdate = this.resolveLink(container, currentKey)
     container[toUpdate] = newKey
+    // Set backpointer
     container[newKey].previousVersion = toUpdate
+    // Copy props
+    container[newKey].hidden = container[toUpdate].hidden
+  }
+
+  hideContent(container, key, hide = true) {
+    const toHide = this.resolveLink(container, key)
+    container[toHide].hidden = hide
   }
   
   updateIndex(oplog) {
@@ -144,8 +154,12 @@ class BoardIndex {
           addComment(this, item)
         } else if (item.payload.op === 'UPDATE_COMMENT'){
           updateComment(this, item)
+        } else if (item.payload.op === 'HIDE_COMMENT'){
+          hideComment(this, item)
+        } else if (item.payload.op === 'HIDE_POST'){
+          hidePost(this, item)
         } else if(item.payload.op === 'UPDATE_METADATA') {
-          this._index.administrations.anarchy = item.payload.metadata
+          this._index.curations.anarchy = item.payload.metadata
         }
       })
   }

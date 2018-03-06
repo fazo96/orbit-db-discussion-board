@@ -58,6 +58,24 @@ class Board extends Store {
     return await this._addOperation(op)
   }
 
+  async hidePost(postId) {
+    const op = {
+      op: 'HIDE_POST',
+      postId
+    }
+    return await this._addOperation(op);
+  }
+
+  async hideComment(postId, commentId, replyTo = 'post') {
+    const op = {
+      op: 'HIDE_COMMENT',
+      postId,
+      commentId,
+      replyTo
+    }
+    return await this._addOperation(op);
+  }
+
   get posts() {
     return this._index.posts
   }

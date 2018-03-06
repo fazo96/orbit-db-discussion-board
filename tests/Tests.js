@@ -76,6 +76,16 @@ describe('OrbitDB Discussion Board', function () {
         assert.equal(updatedPost.text, 'actually I changed my mind')
     })
 
+    it('hide post', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        await db.hidePost(hash)
+        const post = await db.getPost(hash)
+        assert.equal(post.hidden, true)
+    })
+
     it('add comment to post', async () => {
         const hash = await db.addPost({
             title: 'Post Title',
@@ -104,6 +114,23 @@ describe('OrbitDB Discussion Board', function () {
         assert.equal(comments.length, 1)
         assert.equal(comments[0].text, 'Updated comment')
         assert.equal(comments[0].previousVersion, commentHash)
+    })
+
+    it('hide comment', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const comment = await db.getComment(hash, commentHash);
+        let comments = await db.getComments(hash);
+        assert.equal(comments.length, 1)
+        assert.equal(comments[0].text, 'I am a comment')
+        const updatedHash = await db.hideComment(hash, commentHash)
+        comments = await db.getComments(hash);
+        assert.equal(comments[0].hidden, true)
     })
 
     it('comment to post stays after post update', async () => {
