@@ -47,12 +47,27 @@ class Board extends Store {
     return await this._addOperation(op)
   }
 
+  async updateComment(postId, commentId, replyTo = 'post', comment) {
+    const op = {
+      op: 'UPDATE_COMMENT',
+      postId,
+      replyTo,
+      previousVersion: commentId,
+      comment: prepareComment(comment)
+    }
+    return await this._addOperation(op)
+  }
+
   get posts() {
     return this._index.posts
   }
 
   getPost(multihash) {
     return this._index.getPost(multihash)
+  }
+
+  getComment(postMultihash, commentId, replyTo = 'post') {
+    return this._index.getComment(postMultihash, commentId, replyTo);
   }
 
   getComments(postMultihash, replyTo = 'post') {

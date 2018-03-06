@@ -1,6 +1,7 @@
 const addPost = require('./operations/addPost')
 const updatePost = require('./operations/updatePost')
 const addComment = require('./operations/addComment')
+const updateComment = require('./operations/updateComment')
 const _ = require('lodash')
 
 class BoardIndex {
@@ -51,6 +52,11 @@ class BoardIndex {
       .map(c => {
         return Object.assign({ multihash: c }, comments[c])
       })
+  }
+
+  getComment(postId, commentId, replyTo = 'post') {
+    const multihash = this.resolvePostBackwards(postId)
+    return _.get(this._index.comments, [multihash, replyTo, commentId], null) 
   }
 
   resolveLink(container, key, history = []) {
@@ -137,7 +143,7 @@ class BoardIndex {
         } else if (item.payload.op === 'ADD_COMMENT'){
           addComment(this, item)
         } else if (item.payload.op === 'UPDATE_COMMENT'){
-          // TODO: updateComment(this, item)
+          updateComment(this, item)
         } else if(item.payload.op === 'UPDATE_METADATA') {
           this._index.administrations.anarchy = item.payload.metadata
         }

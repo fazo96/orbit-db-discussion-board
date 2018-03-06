@@ -88,6 +88,24 @@ describe('OrbitDB Discussion Board', function () {
         assert.equal(comments.length, 1)
     })
 
+    it('update comment', async () => {
+        const hash = await db.addPost({
+            title: 'Post Title',
+            text: 'hello world'
+        })
+        const commentHash = await db.commentPost(hash, {
+            text: 'I am a comment'
+        })
+        const comment = await db.getComment(hash, commentHash);
+        const updatedHash = await db.updateComment(hash, commentHash, 'post', {
+            text: 'Updated comment'
+        })
+        const comments = await db.getComments(hash);
+        assert.equal(comments.length, 1)
+        assert.equal(comments[0].text, 'Updated comment')
+        assert.equal(comments[0].previousVersion, commentHash)
+    })
+
     it('comment to post stays after post update', async () => {
         const hash = await db.addPost({
             title: 'Post Title',
