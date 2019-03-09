@@ -1,27 +1,64 @@
 const assert = require('chai').assert
 const rmrf = require('rimraf')
 const OrbitDB = require('orbit-db')
-const config = require('orbit-db/test/utils/config')
-const startIpfs = require('orbit-db/test/utils/start-ipfs')
+const IPFSFactory = require('ipfsd-ctl')
 
 const dbPath = './orbitdb/tests/'
+const dbName = 'dicussion-board-test'
 const ipfsPath = './orbitdb/tests/ipfs'
+const timeoutMs = 10000
 
 const BoardStore = require('../src/BoardStore')
 OrbitDB.addDatabaseType(BoardStore.type, BoardStore)
 
+const ipfsConfig = {
+    repo: ipfsPath,
+    EXPERIMENTAL: {
+      pubsub: true
+    },
+    config: {
+      Addresses: {
+        API: '/ip4/127.0.0.1/tcp/0',
+        Swarm: ['/ip4/0.0.0.0/tcp/0'],
+        Gateway: '/ip4/0.0.0.0/tcp/0'
+      },
+      Bootstrap: [],
+      Discovery: {
+        MDNS: {
+          Enabled: true,
+          Interval: 1
+        },
+        webRTCStar: {
+          Enabled: false
+        }
+      },
+    }
+ }
+
+async function startIpfs() {
+    const ipfs = await new Promise(resolve => {
+      IPFSFactory
+        .create({
+            type: 'proc',
+            exec: require('ipfs')
+        })
+        .spawn(ipfsConfig, async (err, ipfsd) => {
+            if (err) reject(err); else resolve(ipfsd.api)
+        })
+    })
+    return ipfs
+}
+
 describe('OrbitDB Discussion Board', function () {
-    this.timeout(config.timeout)
+    this.timeout(timeoutMs)
 
     let ipfs, orbitdb1, db
 
     before(async () => {
-        config.daemon1.repo = ipfsPath
-        rmrf.sync(config.daemon1.repo)
         rmrf.sync(dbPath)
-        ipfs = await startIpfs(config.daemon1)
+        rmrf.sync(ipfsPath)
+        ipfs = await startIpfs()
         orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
-        orbitdb1.addDatabaseType
     })
 
     after(async () => {
@@ -30,10 +67,10 @@ describe('OrbitDB Discussion Board', function () {
     })
 
     beforeEach(async () => {
-        db = await orbitdb1.open(config.dbname, {
+        db = await orbitdb1.open(dbName, {
             type: BoardStore.type,
             create: true,
-            path: dbPath
+            directory: dbPath
         })
     })
 
