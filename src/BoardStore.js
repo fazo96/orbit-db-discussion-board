@@ -79,6 +79,10 @@ class Board extends Store {
   get posts() {
     return this._index.posts
   }
+  
+  get metadata() {
+    return this._index.metadata
+  }
 
   getPost(multihash) {
     return this._index.getPost(multihash)

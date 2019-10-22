@@ -18,7 +18,7 @@ class BoardIndex {
   }
 
   get metadata() {
-    return Object.assign({}, this._index.metadata)
+    return Object.assign({}, this._index.curations.anarchy)
   }
 
   get posts() {
