@@ -4,7 +4,7 @@ function addPost(b, item) {
     b._index.posts[item.hash] = {
       title: item.payload.post.title,
       contentType: item.payload.post.contentType,
-      key: item.key
+      key: item.identity.publicKey
     }
     if (item.payload.post.multihash) {
       b._index.posts[item.hash].multihash = item.payload.post.multihash

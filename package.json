@@ -18,14 +18,14 @@
   "homepage": "https://github.com/fazo96/ipfs-boards#readme",
   "dependencies": {
     "lodash": "^4.17.11",
-    "orbit-db-store": "^2.5.3"
+    "orbit-db-store": "~2.7.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "ipfs": "~0.33.0",
-    "ipfsd-ctl": "^0.42.0",
+    "ipfs": "~0.38.1",
+    "ipfsd-ctl": "^0.47.4",
     "mocha": "^6.0.2",
-    "orbit-db": "^0.19.9",
+    "orbit-db": "^0.22.0",
     "rimraf": "^2.6.3"
   }
 }

@@ -13,9 +13,6 @@ OrbitDB.addDatabaseType(BoardStore.type, BoardStore)
 
 const ipfsConfig = {
     repo: ipfsPath,
-    EXPERIMENTAL: {
-      pubsub: true
-    },
     config: {
       Addresses: {
         API: '/ip4/127.0.0.1/tcp/0',
@@ -36,17 +33,13 @@ const ipfsConfig = {
  }
 
 async function startIpfs() {
-    const ipfs = await new Promise(resolve => {
-      IPFSFactory
+    const ipfsd = await IPFSFactory
         .create({
             type: 'proc',
             exec: require('ipfs')
         })
-        .spawn(ipfsConfig, async (err, ipfsd) => {
-            if (err) reject(err); else resolve(ipfsd.api)
-        })
-    })
-    return ipfs
+        .spawn(ipfsConfig)
+    return ipfsd.api
 }
 
 describe('OrbitDB Discussion Board', function () {
@@ -58,7 +51,7 @@ describe('OrbitDB Discussion Board', function () {
         rmrf.sync(dbPath)
         rmrf.sync(ipfsPath)
         ipfs = await startIpfs()
-        orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+        orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/1' })
     })
 
     after(async () => {
@@ -94,7 +87,7 @@ describe('OrbitDB Discussion Board', function () {
         assert.equal(post.title, 'Post Title')
         assert.equal(post.text, 'hello world')
         assert.equal(post.contentType, 'text/plain')
-        assert.equal(post.key, orbitdb1.key.getPublic('hex'))
+        assert.equal(post.key, orbitdb1.identity.publicKey)
     })
 
     it('update post', async () => {

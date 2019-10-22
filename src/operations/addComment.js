@@ -11,7 +11,7 @@ function addComment(b, item) {
       b._index.comments[postId][replyTo][item.hash] = {
         text: item.payload.comment.text,
         contentType: item.payload.comment.contentType,
-        key: item.key
+        key: item.identity.publicKey
       }
     }
   }

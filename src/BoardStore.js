@@ -2,10 +2,10 @@ const Store = require('orbit-db-store')
 const BoardIndex = require('./BoardIndex')
 
 class Board extends Store {
-  constructor(ipfs, id, dbname, options) {
+  constructor(ipfs, identity, dbname, options) {
     if (!options) options = {}
     if (!options.Index) Object.assign(options, { Index: BoardIndex })
-    super(ipfs, id, dbname, options)
+    super(ipfs, identity, dbname, options)
     this._type = 'discussion-board' 
   }
 
