@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "ipfs": "~0.39.0",
+    "ipfs": "~0.65.0",
     "ipfsd-ctl": "^0.47.4",
     "mocha": "^6.2.2",
     "orbit-db": "^0.22.0",
